@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sales Executive Tracking System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #f4f6f7;
+            --text-color: #2c3e50;
+            --hover-color: #2980b9;
+            --active-color: #1abc9c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .logo {
+            width: 355px;
+            height: 203px;
+            object-fit: contain;
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: var(--text-color);
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            background: #ecf0f1;
+        }
+
+        .tab:hover {
+            background-color: var(--hover-color);
+            color: white;
+        }
+
+        .tab.active {
+            background-color: var(--active-color);
+            color: white;
+        }
+
+        .form-container {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .form-container.active {
+            display: block;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, button:focus {
+            outline: none;
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: var(--hover-color);
+        }
+
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .close-btn {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="https://res.cloudinary.com/drkygeaeh/image/upload/v1742996500/Artboard_2_m2anel.png" alt="Company Logo" class="logo">
+
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('checkin')">Check-In</div>
+        <div class="tab" onclick="showTab('checkout')">Check-Out</div>
+    </div>
+
+    <div id="checkin" class="form-container active">
+        <form id="checkinForm" onsubmit="return handleCheckIn(event)">
+            <input type="text" id="checkinUsername" placeholder="Username" required>
+            <input type="password" id="checkinPassword" placeholder="Password" required>
+            
+            <select id="checkinLocation" required>
+                <option value="">Select Site Location</option>
+                <option value="narsingi">Narsingi</option>
+                <option value="shankarpally">Shankarpally</option>
+            </select>
+
+            <button type="submit">Check-In</button>
+        </form>
+    </div>
+
+    <div id="checkout" class="form-container">
+        <form id="checkoutForm" onsubmit="return handleCheckOut(event)">
+            <input type="text" id="checkoutUsername" placeholder="Username" required>
+            <input type="password" id="checkoutPassword" placeholder="Password" required>
+
+            <select id="checkoutLocation" required>
+                <option value="">Select Site Location</option>
+                <option value="narsingi">Narsingi</option>
+                <option value="shankarpally">Shankarpally</option>
+            </select>
+
+            <button type="submit">Check-Out</button>
+        </form>
+    </div>
+</div>
+
+<!-- Popup -->
+<div class="popup" id="popup">
+    <div class="popup-content">
+        <h3>Check-In Successful!</h3>
+        <p><strong>Name:</strong> <span id="popupName"></span></p>
+        <p><strong>Site Location:</strong> <span id="popupLocation"></span></p>
+        <p><strong>Date:</strong> <span id="popupDate"></span></p>
+        <p><strong>Time:</strong> <span id="popupTime"></span></p>
+        <button class="close-btn" onclick="closePopup()">Close</button>
+    </div>
+</div>
+
+<script>
+    const narsingiCoords = { lat: 17.38547, lng: 78.36186 }; // Narsingi coordinates
+    const shankarpallyCoords = { lat: 17.412639, lng: 78.336634 }; // Shankarpally coordinates 17.412639, 78.336634
+    const RADIUS_METERS = 150;
+
+    function showTab(tabName) {
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.form-container').forEach(form => form.classList.remove('active'));
+
+        document.getElementById(tabName).classList.add('active');
+        document.querySelector(`.tab[onclick="showTab('${tabName}')"]`).classList.add('active');
+    }
+
+    function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
+        const R = 6371000; // Radius of Earth in meters
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    function handleCheckIn(event) {
+        event.preventDefault();
+        const username = document.getElementById('checkinUsername').value;
+        const location = document.getElementById('checkinLocation').value;
+
+        if (location === 'narsingi' && username === 'mdgousoddin') {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const distance = getDistanceFromLatLonInMeters(
+                        position.coords.latitude,
+                        position.coords.longitude,
+                        narsingiCoords.lat,
+                        narsingiCoords.lng
+                    );
+
+                    if (distance <= RADIUS_METERS) {
+                        showPopup(username, location);
+                    } else {
+                        alert('You are outside the allowed range for Narsingi!');
+                    }
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        } else if (location === 'shankarpally' && username === 'satishguda') {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const distance = getDistanceFromLatLonInMeters(
+                        position.coords.latitude,
+                        position.coords.longitude,
+                        shankarpallyCoords.lat,
+                        shankarpallyCoords.lng
+                    );
+
+                    if (distance <= RADIUS_METERS) {
+                        showPopup(username, location);
+                    } else {
+                        alert('You are outside the allowed range for Shankarpally!');
+                    }
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        } else {
+            alert('Invalid username or location.');
+        }
+    }
+
+    function showPopup(username, location) {
+        const date = new Date();
+        const formattedDate = date.toLocaleDateString();
+        const formattedTime = date.toLocaleTimeString();
+
+        document.getElementById('popupName').innerText = username;
+        document.getElementById('popupLocation').innerText = location;
+        document.getElementById('popupDate').innerText = formattedDate;
+        document.getElementById('popupTime').innerText = formattedTime;
+
+        document.getElementById('popup').style.display = 'flex';
+    }
+
+    function closePopup() {
+        document.getElementById('popup').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
