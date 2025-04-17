@@ -191,22 +191,37 @@
     </div>
 </div>
 
-<!-- Popup -->
-<div class="popup" id="popup">
+<!-- Check-In Popup -->
+<div class="popup" id="checkinPopup">
     <div class="popup-content">
         <h3>Check-In Successful!</h3>
-        <p><strong>Name:</strong> <span id="popupName"></span></p>
-        <p><strong>Site Location:</strong> <span id="popupLocation"></span></p>
-        <p><strong>Date:</strong> <span id="popupDate"></span></p>
-        <p><strong>Time:</strong> <span id="popupTime"></span></p>
-        <button class="close-btn" onclick="closePopup()">Close</button>
+        <p><strong>Name:</strong> <span id="checkinPopupName"></span></p>
+        <p><strong>Site Location:</strong> <span id="checkinPopupLocation"></span></p>
+        <p><strong>Date:</strong> <span id="checkinPopupDate"></span></p>
+        <p><strong>Time:</strong> <span id="checkinPopupTime"></span></p>
+        <button class="close-btn" onclick="closePopup('checkinPopup')">Close</button>
+    </div>
+</div>
+
+<!-- Check-Out Popup -->
+<div class="popup" id="checkoutPopup">
+    <div class="popup-content">
+        <h3>Check-Out Successful!</h3>
+        <p><strong>Name:</strong> <span id="checkoutPopupName"></span></p>
+        <p><strong>Site Location:</strong> <span id="checkoutPopupLocation"></span></p>
+        <p><strong>Date:</strong> <span id="checkoutPopupDate"></span></p>
+        <p><strong>Time:</strong> <span id="checkoutPopupTime"></span></p>
+        <button class="close-btn" onclick="closePopup('checkoutPopup')">Close</button>
     </div>
 </div>
 
 <script>
-    const narsingiCoords = { lat: 17.38547, lng: 78.36186 }; // Narsingi coordinates
-    const shankarpallyCoords = { lat: 17.450939, lng: 78.140739 }; // Shankarpally coordinates 17.412639, 78.336634 , 
+    const narsingiCoords = { lat: 17.385595, lng: 78.361913 }; // Narsingi coordinates
+    const shankarpallyCoords = { lat: 17.450939, lng: 78.140739 }; // Shankarpally coordinates
     const RADIUS_METERS = 150;
+ // office location 17.412507, 78.336551 
+ // shankarpally lat: 17.450939, lng: 78.140739
+ // Narsingi cordinate 17.385595, 78.361913
 
     function showTab(tabName) {
         document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
@@ -245,7 +260,7 @@
                     );
 
                     if (distance <= RADIUS_METERS) {
-                        showPopup(username, location);
+                        showCheckinPopup(username, location);
                     } else {
                         alert('You are outside the allowed range for Narsingi!');
                     }
@@ -264,7 +279,7 @@
                     );
 
                     if (distance <= RADIUS_METERS) {
-                        showPopup(username, location);
+                        showCheckinPopup(username, location);
                     } else {
                         alert('You are outside the allowed range for Shankarpally!');
                     }
@@ -277,21 +292,82 @@
         }
     }
 
-    function showPopup(username, location) {
+    function handleCheckOut(event) {
+        event.preventDefault();
+        const username = document.getElementById('checkoutUsername').value;
+        const location = document.getElementById('checkoutLocation').value;
+
+        if (location === 'narsingi' && username === 'mdgousoddin') {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const distance = getDistanceFromLatLonInMeters(
+                        position.coords.latitude,
+                        position.coords.longitude,
+                        narsingiCoords.lat,
+                        narsingiCoords.lng
+                    );
+
+                    if (distance <= RADIUS_METERS) {
+                        showCheckoutPopup(username, location);
+                    } else {
+                        alert('You are outside the allowed range for Narsingi!');
+                    }
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        } else if (location === 'shankarpally' && username === 'satishguda') {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const distance = getDistanceFromLatLonInMeters(
+                        position.coords.latitude,
+                        position.coords.longitude,
+                        shankarpallyCoords.lat,
+                        shankarpallyCoords.lng
+                    );
+
+                    if (distance <= RADIUS_METERS) {
+                        showCheckoutPopup(username, location);
+                    } else {
+                        alert('You are outside the allowed range for Shankarpally!');
+                    }
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        } else {
+            alert('Invalid username or location.');
+        }
+    }
+
+    function showCheckinPopup(username, location) {
         const date = new Date();
         const formattedDate = date.toLocaleDateString();
         const formattedTime = date.toLocaleTimeString();
 
-        document.getElementById('popupName').innerText = username;
-        document.getElementById('popupLocation').innerText = location;
-        document.getElementById('popupDate').innerText = formattedDate;
-        document.getElementById('popupTime').innerText = formattedTime;
+        document.getElementById('checkinPopupName').innerText = username;
+        document.getElementById('checkinPopupLocation').innerText = location;
+        document.getElementById('checkinPopupDate').innerText = formattedDate;
+        document.getElementById('checkinPopupTime').innerText = formattedTime;
 
-        document.getElementById('popup').style.display = 'flex';
+        document.getElementById('checkinPopup').style.display = 'flex';
     }
 
-    function closePopup() {
-        document.getElementById('popup').style.display = 'none';
+    function showCheckoutPopup(username, location) {
+        const date = new Date();
+        const formattedDate = date.toLocaleDateString();
+        const formattedTime = date.toLocaleTimeString();
+
+        document.getElementById('checkoutPopupName').innerText = username;
+        document.getElementById('checkoutPopupLocation').innerText = location;
+        document.getElementById('checkoutPopupDate').innerText = formattedDate;
+        document.getElementById('checkoutPopupTime').innerText = formattedTime;
+
+        document.getElementById('checkoutPopup').style.display = 'flex';
+    }
+
+    function closePopup(popupId) {
+        document.getElementById(popupId).style.display = 'none';
     }
 </script>
 
